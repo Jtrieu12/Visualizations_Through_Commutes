@@ -1,0 +1,65 @@
+df = pd.read_csv("/content/drive/MyDrive/Datasets/CommuteStLouis.csv")
+
+#print(df.info())
+print(df.isnull().any())
+print(df.describe())
+
+plt.hist(df.loc[~df['Age'].isnull(), 'Age'])
+plt.title("Histogram of Age")
+plt.ylabel("Freq")
+plt.xlabel("Age")
+
+#a) 
+print(df.corr())
+#Distance and Time are the two variables most correlated with each other, with a coeff of .830241 
+sb.pairplot(df)
+plt.show()
+
+#The data is right-skewed, which is particularly evident in Distance and Time, as the histogram's tail veers to the right. 
+
+male = df["Distance"][df["Sex"]=="M"]
+female = df["Distance"][df["Sex"]=="F"]
+data = [male , female]
+eh = plt.boxplot(data, meanline=True, patch_artist= True)
+
+colors = ['Blue', 'Orange'] 
+  
+for items, color in zip(eh['boxes'], colors): 
+    items.set_facecolor(color) 
+plt.xticks([1,2],["M","F"])
+plt.ylabel("Distance")
+plt.xlabel("Sex")
+plt.show()
+
+#this shows that women tend to have shorter commutes, as the meanline for "F" boxplot is lower than the "M" boxplot
+
+
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+reg = LinearRegression()
+x = df['Distance']
+X = x[:,np.newaxis]
+y = df['Time']
+reg.fit(X,y)
+y_pred = reg.predict(X)
+
+
+plt.scatter(x,y)
+plt.plot(X,y_pred)
+plt.title("Scatterplot and Linear Regression of Time vs Distance")
+plt.ylabel("Time")
+plt.xlabel("Distance")
+plt.show()
+from yellowbrick.regressor import ResidualsPlot
+from sklearn.metrics import r2_score
+
+r2 = r2_score(y,y_pred)
+
+vis = ResidualsPlot(reg)
+vis.fit(X,y)
+plt.title("Scatterplot and Linear Regression of Time v Distance")
+plt.ylabel("Time")
+plt.xlabel("Distance")
+plt.grid
+plt.axhline(y=r2,color="black")
+plt.show()
